@@ -11,11 +11,10 @@ Apache-2.0
 It follows the Qingming-style principle:
 
 ```text
-fixed contract
+contract
 deterministic protocol boundary
 explicit proof file
 standalone verification
-no black-box SDK
 ```
 
 ## Official integration surface
@@ -26,17 +25,6 @@ The official integration surface is intentionally small:
 CLI prover
 QSPG64 .qsp proof file
 standalone verifier
-```
-
-This package does not provide:
-
-```text
-libqingming_stark_g64.so
-official C ABI
-official C++ SDK
-Rust crate
-Python package
-black-box binary SDK
 ```
 
 Community integrations should wrap the CLI and exchange `.qsp` proof files.
@@ -60,7 +48,7 @@ AIR: QINGMING-AIR-GEOCLOCK-G64
 
 Other AMD GPUs may work, but this package only claims verification on RX 7900 XTX 24GB.
 
-## Fixed cryptographic contract
+## cryptographic contract
 
 ### Field
 
@@ -304,13 +292,4 @@ inspectable QSPG64 proof file
 standalone verifier
 retained Merkle tree proof builder
 compiled AIR profile integration path
-```
-
-The project intentionally avoids black-box integration in this baseline:
-
-```text
-no shared library
-no official SDK ABI
-no hidden prover service
-no opaque proof generation path
 ```
