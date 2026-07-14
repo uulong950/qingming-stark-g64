@@ -41,7 +41,7 @@ build_core(){
   rustc -O "$ROOT/cpu-rust/qingming_stark_g64.rs" -o "$RUST"
   echo "[build] RX7900XTX canonical prover ($GPU_ARCH)"
   hipcc -O3 -std=c++20 --offload-arch="$GPU_ARCH" -x hip \
-    "$ROOT/rx7900xtx-24g/qingming_stark_g64_rx7900xtx.hip" -o "$GPU"
+    "$ROOT/rx7900xtx-24g/qingming_stark_g64_backend.hip" -o "$GPU"
 }
 
 build_air_examples(){
