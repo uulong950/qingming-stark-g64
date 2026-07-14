@@ -1,7 +1,7 @@
 # QINGMING-STARK-G64 Canonical Mathematical Contract
 
-> **Status:** Frozen normative contract
-> **Canonical proof format:** `QMG64P01`
+> **Status:** Frozen normative contract  
+> **Canonical proof format:** `QMG64P01`  
 > **Supported protocol Scale:** `2^20` through `2^27`, inclusive
 
 This document is the **only normative mathematical contract** in this delivery.
@@ -15,18 +15,13 @@ Source code, scripts, reports, generated proofs, and implementation behavior are
 The base field is the Goldilocks prime field:
 
 $$
-\mathbb{F}_p,
-\qquad
-p = 2^{64} - 2^{32} + 1.
+\mathbb{F}_p, \qquad p = 2^{64} - 2^{32} + 1.
 $$
 
 The quadratic extension field is:
 
 $$
-\mathbb{F}_{p^2}
-================
-
-\mathbb{F}_p[u]/(u^2 - 7).
+\mathbb{F}_{p^2} = \mathbb{F}_p[u]/(u^2 - 7).
 $$
 
 ### 1.1 Base-field encoding
@@ -51,7 +46,7 @@ is encoded as the ordered pair:
 (a, b)
 ```
 
-where both coordinates are canonical base-field elements.
+Both coordinates MUST be canonical base-field elements.
 
 ### 1.3 Decoder requirements
 
@@ -69,12 +64,12 @@ Decoders MUST reject:
 
 The protocol uses the following fixed parameters:
 
-| Symbol             | Value | Meaning                    |
-| ------------------ | ----: | -------------------------- |
-| $W$                |    64 | Number of trace columns    |
-| $B$                |     8 | LDE blowup factor          |
-| $Q$                |    64 | Number of queries          |
-| $T_{\mathrm{FRI}}$ |    16 | Terminal FRI vector length |
+| Symbol | Value | Meaning |
+| ------ | ----: | ------- |
+| `W` | 64 | Number of trace columns |
+| `B` | 8 | LDE blowup factor |
+| `Q` | 64 | Number of queries |
+| `T_FRI` | 16 | Terminal FRI vector length |
 
 `Scale = 2^K` denotes the **total number of base-field elements across all 64 post-LDE trace columns**.
 
@@ -96,40 +91,37 @@ $$
 M = \frac{S}{W} = 2^{K-6},
 $$
 
+and:
+
 $$
 N = \frac{M}{B} = 2^{K-9}.
 $$
 
 Where:
 
-* $S$ is the total number of post-LDE base-field elements;
-* $M$ is the post-LDE row count;
-* $M$ is also the trace Merkle leaf count;
-* $N$ is the original trace row count.
+* `S` is the total number of post-LDE base-field elements;
+* `M` is the post-LDE row count;
+* `M` is also the trace Merkle leaf count;
+* `N` is the original trace row count.
 
 The number of binary FRI folds is:
 
 $$
-R
-=
-
-# \log_2 M - \log_2 16
-
-K - 10.
+R = \log_2 M - \log_2 16 = K - 10.
 $$
 
 ### 2.1 Canonical Scale table
 
-|    Scale | Total LDE elements $S$ | Columns | LDE rows / Merkle leaves $M$ |     Trace rows $N$ | Trace elements | LDE bytes | FRI folds | Committed FRI roots | Vectors including terminal |
-| -------: | ---------------------: | ------: | ---------------------------: | -----------------: | -------------: | --------: | --------: | ------------------: | -------------------------: |
-| $2^{20}$ |              1,048,576 |      64 |            16,384 ($2^{14}$) |   2,048 ($2^{11}$) |        131,072 |     8 MiB |        10 |                  10 |                         11 |
-| $2^{21}$ |              2,097,152 |      64 |            32,768 ($2^{15}$) |   4,096 ($2^{12}$) |        262,144 |    16 MiB |        11 |                  11 |                         12 |
-| $2^{22}$ |              4,194,304 |      64 |            65,536 ($2^{16}$) |   8,192 ($2^{13}$) |        524,288 |    32 MiB |        12 |                  12 |                         13 |
-| $2^{23}$ |              8,388,608 |      64 |           131,072 ($2^{17}$) |  16,384 ($2^{14}$) |      1,048,576 |    64 MiB |        13 |                  13 |                         14 |
-| $2^{24}$ |             16,777,216 |      64 |           262,144 ($2^{18}$) |  32,768 ($2^{15}$) |      2,097,152 |   128 MiB |        14 |                  14 |                         15 |
-| $2^{25}$ |             33,554,432 |      64 |           524,288 ($2^{19}$) |  65,536 ($2^{16}$) |      4,194,304 |   256 MiB |        15 |                  15 |                         16 |
-| $2^{26}$ |             67,108,864 |      64 |         1,048,576 ($2^{20}$) | 131,072 ($2^{17}$) |      8,388,608 |   512 MiB |        16 |                  16 |                         17 |
-| $2^{27}$ |            134,217,728 |      64 |         2,097,152 ($2^{21}$) | 262,144 ($2^{18}$) |     16,777,216 |     1 GiB |        17 |                  17 |                         18 |
+| Scale | Total LDE elements (`S`) | Columns | LDE rows / Merkle leaves (`M`) | Trace rows (`N`) | Trace elements | LDE bytes | FRI folds | Committed FRI roots | Vectors including terminal |
+| ----: | -----------------------: | ------: | -----------------------------: | ---------------: | -------------: | --------: | --------: | ------------------: | -------------------------: |
+| `2^20` | 1,048,576 | 64 | 16,384 (`2^14`) | 2,048 (`2^11`) | 131,072 | 8 MiB | 10 | 10 | 11 |
+| `2^21` | 2,097,152 | 64 | 32,768 (`2^15`) | 4,096 (`2^12`) | 262,144 | 16 MiB | 11 | 11 | 12 |
+| `2^22` | 4,194,304 | 64 | 65,536 (`2^16`) | 8,192 (`2^13`) | 524,288 | 32 MiB | 12 | 12 | 13 |
+| `2^23` | 8,388,608 | 64 | 131,072 (`2^17`) | 16,384 (`2^14`) | 1,048,576 | 64 MiB | 13 | 13 | 14 |
+| `2^24` | 16,777,216 | 64 | 262,144 (`2^18`) | 32,768 (`2^15`) | 2,097,152 | 128 MiB | 14 | 14 | 15 |
+| `2^25` | 33,554,432 | 64 | 524,288 (`2^19`) | 65,536 (`2^16`) | 4,194,304 | 256 MiB | 15 | 15 | 16 |
+| `2^26` | 67,108,864 | 64 | 1,048,576 (`2^20`) | 131,072 (`2^17`) | 8,388,608 | 512 MiB | 16 | 16 | 17 |
+| `2^27` | 134,217,728 | 64 | 2,097,152 (`2^21`) | 262,144 (`2^18`) | 16,777,216 | 1 GiB | 17 | 17 | 18 |
 
 ### 2.2 FRI vector sizes
 
@@ -153,62 +145,44 @@ extension-field elements.
 
 Each trace row contains four groups of sixteen columns:
 
-$$
-(x_0,\ldots,x_{15}),
-$$
+```text
+(x_0,...,x_15), (a_0,...,a_15), (m_0,...,m_15), (h_0,...,h_15)
+```
 
-$$
-(a_0,\ldots,a_{15}),
-$$
-
-$$
-(m_0,\ldots,m_{15}),
-$$
-
-$$
-(h_0,\ldots,h_{15}).
-$$
-
-For each lane $j$, indices are cyclic modulo 16.
+For each lane `j`, indices are cyclic modulo 16.
 
 Define:
 
-$$
-c_j
-===
-
-\operatorname{canonical}
-\left(
-\mathtt{0x9e3779b97f4a7c15} + j
-\right).
-$$
+```text
+c_j = canonical(0x9e3779b97f4a7c15 + j)
+```
 
 ### 3.1 Transition constraints
 
-For every lane $j$:
+For every lane `j`:
 
-$$
-m_j - x_jx_{j+1} = 0,
-$$
+```text
+m_j - x_j * x_(j+1) = 0
+```
 
-$$
-h_j - x_j^2 = 0,
-$$
+```text
+h_j - x_j^2 = 0
+```
 
-$$
-a'_j - a_j - m_j = 0,
-$$
+```text
+a'_j - a_j - m_j = 0
+```
 
-$$
-x'*j - c_j - x_j - 3x*{j+1} - 5h_j - 7m_j = 0.
-$$
+```text
+x'_j - c_j - x_j - 3*x_(j+1) - 5*h_j - 7*m_j = 0
+```
 
 ### 3.2 Boundary constraints
 
 The first row binds:
 
-* $x_j$ to the public initial state;
-* $a_j = 0$.
+* `x_j` to the public initial state;
+* `a_j = 0`.
 
 The final trace row binds the accumulators to the public final accumulator.
 
@@ -216,9 +190,9 @@ The final trace row binds the accumulators to the public final accumulator.
 
 The AIR has algebraic degree:
 
-$$
-2.
-$$
+```text
+2
+```
 
 ---
 
@@ -226,25 +200,23 @@ $$
 
 Let the trace domain be:
 
-$$
-H_N = \langle \omega_N \rangle.
-$$
+```text
+H_N = <omega_N>
+```
 
 The post-LDE evaluation domain is the multiplicative coset:
 
-$$
-7H_M,
-\qquad
-M = 8N.
-$$
+```text
+7H_M, where M = 8N
+```
 
 For each of the 64 trace columns:
 
-1. interpolate the column from $H_N$;
-2. convert it to coefficient form;
-3. multiply the coefficients by successive powers of the coset shift $7$;
-4. zero-pad the coefficient vector to length $M$;
-5. perform a forward transform over $H_M$.
+1. interpolate the column from `H_N`;
+2. convert the column to coefficient form;
+3. multiply the coefficients by successive powers of the coset shift `7`;
+4. zero-pad the coefficient vector to length `M`;
+5. perform a forward transform over `H_M`.
 
 ### 4.1 Final GPU proving path
 
@@ -290,45 +262,36 @@ The implementation streams this payload into device memory and does not retain a
 
 ## 5. Composition Quotient
 
-For:
+For `z` in `7H_M`, transition constraints are divided by:
 
-$$
-z \in 7H_M,
-$$
-
-transition constraints are divided by:
-
-$$
-Z_{\mathrm{trans}}(z)
-=====================
-
-\frac{z^N - 1}{z - \omega_N^{-1}}.
-$$
+```text
+Z_trans(z) = (z^N - 1) / (z - omega_N^(-1))
+```
 
 Initial boundary constraints use the denominator:
 
-$$
-z - 1.
-$$
+```text
+z - 1
+```
 
 Final boundary constraints use the denominator:
 
-$$
-z - \omega_N^{-1}.
-$$
+```text
+z - omega_N^(-1)
+```
 
 The protocol produces 112 normalized constraint values.
 
 These values are mixed in the specified lane and constraint order using successive powers of the transcript challenge:
 
-$$
-\alpha \in \mathbb{F}_{p^2}.
-$$
+```text
+alpha in F_(p^2)
+```
 
 The resulting composition quotient:
 
-* has degree strictly below $N$;
-* forms the initial $M$-element FRI word.
+* has degree strictly below `N`;
+* forms the initial `M`-element FRI word.
 
 ---
 
@@ -338,15 +301,15 @@ The resulting composition quotient:
 
 The protocol uses the following frozen Poseidon2 parameters:
 
-| Parameter      |                 Value |
-| -------------- | --------------------: |
-| Width          |                    12 |
-| Rate           |                     8 |
-| Capacity       |                     4 |
-| Digest size    | 4 base-field elements |
-| S-box          |                 $x^7$ |
-| Full rounds    |                     8 |
-| Partial rounds |                    22 |
+| Parameter | Value |
+| --------- | ----: |
+| Width | 12 |
+| Rate | 8 |
+| Capacity | 4 |
+| Digest size | 4 base-field elements |
+| S-box | `x^7` |
+| Full rounds | 8 |
+| Partial rounds | 22 |
 
 The frozen round constants are defined in:
 
@@ -383,7 +346,6 @@ H_NODE(left_digest[4] || right_digest[4])
 The Merkle tree is a complete binary tree.
 
 Authentication paths are ordered from leaf to root.
-
 ---
 
 ## 7. Transcript
@@ -397,7 +359,7 @@ It then absorbs data in the following exact order:
 
 1. public-input digest;
 2. canonical indexed trace root;
-3. each committed quotient or FRI root, before deriving that layer's $\beta$ challenge;
+3. each committed quotient or FRI root, before deriving that layer's `beta` challenge;
 4. hash of the 16-element terminal vector;
 5. query challenges.
 
@@ -409,40 +371,34 @@ An extension-field challenge is constructed from two consecutive base-field sque
 
 Exactly 64 query indices are generated by rejection sampling into:
 
-$$
-[0,M).
-$$
+```text
+[0, M)
+```
 
-No biased modular reduction is permitted.
+Biased modular reduction MUST NOT be used.
 
 ---
 
 ## 8. Binary FRI
 
-For FRI layer $\ell$, let:
+For FRI layer `l`, let:
 
-* $g_\ell$ be the layer offset;
-* $a = f(x)$;
-* $b = f(-x)$;
-* $\beta_\ell$ be the layer challenge.
+* `g_l` be the layer offset;
+* `a = f(x)`;
+* `b = f(-x)`;
+* `beta_l` be the layer challenge.
 
 The binary fold is:
 
-$$
-f_{\ell+1}(x^2)
-===============
-
-\frac{a+b}{2}
-+
-\beta_\ell
-\frac{a-b}{2x}.
-$$
+```text
+f_(l+1)(x^2) = (a+b)/2 + beta_l * ((a-b)/(2x))
+```
 
 After each fold, the layer offset is squared:
 
-$$
-g_{\ell+1} = g_\ell^2.
-$$
+```text
+g_(l+1) = g_l^2
+```
 
 Folding stops when 16 extension-field values remain.
 
@@ -548,7 +504,7 @@ The canonical correctness invocation is:
 ./benchmarks/run.sh correctness 20 27 3
 ```
 
-The arguments specify:
+The arguments are:
 
 ```text
 correctness <minimum Scale exponent> <maximum Scale exponent> <GPU repeat count>
@@ -628,7 +584,7 @@ The canonical performance invocation is:
 WARMUP=1 ./benchmarks/run.sh performance 20 27 5
 ```
 
-The arguments specify:
+The arguments are:
 
 ```text
 performance <minimum Scale exponent> <maximum Scale exponent> <measured repeat count>
