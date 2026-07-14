@@ -1,0 +1,14 @@
+status=PASS
+implementation=rust
+proof_format=QMG64P01
+scale_log2=25
+trace_log2=16
+lde_rows=524288
+fri_fold_rounds=15
+query_count=64
+terminal_elements=16
+proof_bytes=921116
+proof_fnv=9df9be926c342d5c
+trace_root=0x3623ba2a5e159e31;0x7c82292328f2accb;0x059af422d2c1c6c9;0x13e1ee096a0eaf23
+proof_file=/zxlong/product/qingming-zkp/qingming-test-v7/qingming-stark-g64/build/proofs/rust-scale-25.qmg64p01
+verifier=PASS

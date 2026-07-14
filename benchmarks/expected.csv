@@ -1,0 +1,4 @@
+record,id,trace_fingerprint,public_output_0,public_output_1,public_output_2,public_output_3,trace_root,proof_bytes,proof_fnv
+air,QMG-AIR-FIBONACCI,0738a8891e2be44e,2178309,3524578,,,,,
+air,QMG-AIR-POSEIDON2-CHAIN,88cb773e3f3c78d9,12503130814229952347,9430352786367723139,9240873561283387356,14490414504176896119,,,
+canonical,20,,,,,,0x497e153d6e9d6e2a;0x44105c9bf84e6af1;0x72fb0e27747412d1;0x59d0f6e5ccb64a56,539516,1a0614193dbbff79

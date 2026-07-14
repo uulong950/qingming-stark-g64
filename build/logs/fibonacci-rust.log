@@ -1,0 +1,11 @@
+status=PASS
+air_id=QMG-AIR-FIBONACCI
+air_revision=1
+backend=rust
+trace_rows=32
+trace_width=2
+maximum_constraint_degree=1
+constraint_residuals=64
+trace_fingerprint=0738a8891e2be44e
+public_output_0=2178309
+public_output_1=3524578

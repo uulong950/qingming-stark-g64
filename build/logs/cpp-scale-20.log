@@ -1,0 +1,14 @@
+status=PASS
+implementation=cpp
+proof_format=QMG64P01
+scale_log2=20
+trace_log2=11
+lde_rows=16384
+fri_fold_rounds=10
+query_count=64
+terminal_elements=16
+proof_bytes=539516
+proof_fnv=1a0614193dbbff79
+trace_root=0x497e153d6e9d6e2a;0x44105c9bf84e6af1;0x72fb0e27747412d1;0x59d0f6e5ccb64a56
+proof_file=/zxlong/product/qingming-zkp/qingming-test-v7/qingming-stark-g64/build/proofs/cpp-scale-20.qmg64p01
+verifier=PASS

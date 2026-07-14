@@ -1,295 +1,446 @@
-# qingming-stark-g64
+# QINGMING-STARK-G64
 
-`qingming-stark-g64` is a reproducible Goldilocks STARK backend verified on AMD RX 7900 XTX 24GB.
+QINGMING-STARK-G64 is a canonical STARK implementation over the Goldilocks 64-bit field. The repository contains independent C++ and Rust CPU references, a full RX 7900 XTX GPU prover, canonical proof serialization, and fail-closed verification under one frozen mathematical contract.
 
-License:
+The canonical contract is:
 
 ```text
-Apache-2.0
+QINGMING_STARK_G64_MATHEMATICAL_CONTRACT.md
 ```
 
-It follows the Qingming-style principle:
+Contract revision: `QMG64-FINAL-3`  
+Proof format: `QMG64P01`  
+Supported Scale range: `2^20` through `2^27`
+
+## Measured RX 7900 XTX Performance
+
+The following results were measured on an AMD RX 7900 XTX 24 GB. Each Scale was measured five times after warm-up, for 40 successful measured runs in total.
+
+Every measured run produced the expected deterministic trace root, proof length, proof FNV-1a-64 value, complete proof bytes, and a successful canonical verification result.
+
+| Scale | GPU prover | CPU verification | End-to-end | Total CV | Proof size |
+|---:|---:|---:|---:|---:|---:|
+| `2^20` | 92.25 ms | 148.99 ms | 241.24 ms | 0.379% | 526.9 KiB |
+| `2^21` | 120.66 ms | 168.43 ms | 289.09 ms | 0.590% | 593.4 KiB |
+| `2^22` | 172.58 ms | 188.48 ms | 361.07 ms | 0.475% | 663.9 KiB |
+| `2^23` | 266.24 ms | 210.27 ms | 476.51 ms | 0.262% | 738.5 KiB |
+| `2^24` | 450.42 ms | 233.06 ms | 683.47 ms | 0.181% | 817.0 KiB |
+| `2^25` | 807.83 ms | 257.27 ms | 1,065.10 ms | 0.063% | 899.5 KiB |
+| `2^26` | 1,522.62 ms | 283.44 ms | 1,806.06 ms | 0.050% | 986.1 KiB |
+| `2^27` | 2,959.71 ms | 310.72 ms | 3,270.43 ms | 0.129% | 1,076.6 KiB |
+
+`GPU prover` covers the direct GPU proving path. `End-to-end` includes proof generation and canonical CPU verification. Benchmark results are specific to the tested machine, software stack, clock behavior, and thermal conditions.
+
+At `2^24`, the complete prove-and-verify path finishes in approximately 683 ms. At the maximum supported Scale, `2^27`, it finishes in approximately 3.27 seconds while committing to 134,217,728 post-LDE base-field elements.
+
+## What Scale Means
+
+Scale is not a transaction count and is not the row count of one trace column.
+
+For `Scale = 2^K`:
 
 ```text
-contract
-deterministic protocol boundary
-explicit proof file
-standalone verification
+total post-LDE elements S = 2^K
+committed columns W       = 64
+LDE rows M                = S / 64 = 2^(K - 6)
+trace rows N              = M / 8  = 2^(K - 9)
+FRI folds R               = K - 10
 ```
 
-## Official integration surface
+The fixed blowup factor is 8.
 
-The official integration surface is intentionally small:
+| Scale | Original trace rows | LDE rows | Total post-LDE elements | FRI folds |
+|---:|---:|---:|---:|---:|
+| `2^20` | 2,048 | 16,384 | 1,048,576 | 10 |
+| `2^21` | 4,096 | 32,768 | 2,097,152 | 11 |
+| `2^22` | 8,192 | 65,536 | 4,194,304 | 12 |
+| `2^23` | 16,384 | 131,072 | 8,388,608 | 13 |
+| `2^24` | 32,768 | 262,144 | 16,777,216 | 14 |
+| `2^25` | 65,536 | 524,288 | 33,554,432 | 15 |
+| `2^26` | 131,072 | 1,048,576 | 67,108,864 | 16 |
+| `2^27` | 262,144 | 2,097,152 | 134,217,728 | 17 |
+
+The amount of application work represented by one trace row depends on the application encoding. A Scale value therefore describes the cryptographic trace commitment size, not a universal number of transactions, instructions, or business events.
+
+## Real-Time Proving and Higher-Level Proofs
+
+The measured sub-second result at `2^24` makes Qingming suitable as a low-latency proving core for statements that can be expressed through its fixed 64-column AIR and batching model.
+
+Possible higher-level integrations include:
+
+- batched application state-transition proofs;
+- rollup or settlement batch proofs for a purpose-built state machine;
+- deterministic game, simulation, or control-system state proofs;
+- verifiable accounting, reconciliation, and risk-calculation batches;
+- telemetry, audit-log, and data-pipeline integrity proofs;
+- a high-performance proving component beneath a recursive wrapper or aggregation layer.
+
+These are integration directions rather than built-in applications. Each application must define how its witness, public inputs, and state transitions map into the canonical AIR or into a separately designed compatible AIR.
+
+The practical significance of the benchmark is that a large committed execution trace can be proven on a single consumer GPU with deterministic proof bytes and independently checked by both CPU implementations. This enables low-latency local proving, reproducible benchmark baselines, hardware-backend comparison, and application-specific proof systems without requiring a GPU cluster.
+
+## Canonical Mathematical Contract
+
+### Fields
+
+The base field is the Goldilocks prime field:
 
 ```text
-CLI prover
-QSPG64 .qsp proof file
-standalone verifier
-```
-
-Community integrations should wrap the CLI and exchange `.qsp` proof files.
-
-See:
-
-```text
-docs/INTEGRATION_POLICY.md
-```
-
-## Verified backend
-
-```text
-backend: rx7900xtx-24g
-device: AMD RX 7900 XTX 24GB
-field: Goldilocks / G64
-hash: QINGMING-POSEIDON2-G64
-proof: QSPG64 full STARK proof
-AIR: QINGMING-AIR-GEOCLOCK-G64
-```
-
-Other AMD GPUs may work, but this package only claims verification on RX 7900 XTX 24GB.
-
-## cryptographic contract
-
-### Field
-
-```text
-field: Goldilocks / G64
 p = 2^64 - 2^32 + 1
-encoding: canonical uint64
-rule: no silent reduction
 ```
 
-### Hash
+The quadratic extension is:
 
 ```text
-hash: QINGMING-POSEIDON2-G64
-
-t = 12
-rate = 8
-capacity = 4
-digest_len = 4
-
-alpha = 7
-RF = 8
-RP = 22
+Fp2 = Fp[u] / (u^2 - 7)
 ```
 
-Frozen parameter fingerprints:
+Base-field elements use canonical unsigned little-endian 64-bit encoding in `[0, p)`. Decoders reject non-canonical values, malformed lengths, unsupported revisions, truncated inputs, and trailing bytes.
+
+### Fixed Parameters
 
 ```text
-poseidon2_params_fingerprint:       0xad77784b434bb34c
-poseidon2_test_vectors_fingerprint: 0xffdf9225a1834ebc
+trace width       = 64 columns
+LDE blowup        = 8
+query count       = 64
+FRI terminal size = 16 extension elements
+AIR degree        = 2
 ```
 
-Poseidon2-G64 is used for Merkle hashing, transcript hashing, public input binding, statement binding, composition challenge derivation, FRI challenge derivation, query sampling, and verifier transcript checks.
+### AIR
 
-## STARK contract
-
-Current compiled AIR:
+Each row contains four groups of sixteen columns:
 
 ```text
-QINGMING-AIR-GEOCLOCK-G64
+x[0..15], a[0..15], m[0..15], h[0..15]
 ```
 
-Public input layout:
+For each lane `j`, with cyclic indexing modulo 16:
 
 ```text
-public_inputs[0] = transition_ratio
+m_j       - x_j * x_(j+1)                         = 0
+h_j       - x_j^2                                 = 0
+a'_j      - a_j - m_j                             = 0
+x'_j      - c_j - x_j - 3*x_(j+1) - 5*h_j - 7*m_j = 0
 ```
 
-Constraint:
+The first row binds the initial state and zero accumulators. The final row binds the public final accumulator.
+
+### LDE and Composition
+
+Each trace column is interpolated over the original trace domain and evaluated over an eight-times-larger coset domain. The final GPU path performs trace generation, interpolation, coset expansion, forward NTT, composition, FRI, Merkle commitments, and opening extraction without a host-side LDE bridge.
+
+The normalized AIR transition and boundary constraints are mixed with transcript challenge powers into one extension-field composition quotient.
+
+### Poseidon2 and Merkle Commitments
+
+The frozen Poseidon2 configuration is:
 
 ```text
-trace_next - transition_ratio * trace_current = 0
+width          = 12
+rate           = 8
+capacity       = 4
+digest         = 4 base-field elements
+S-box          = x^7
+full rounds    = 8
+partial rounds = 22
 ```
 
-The AIR profile owns:
+Trace leaves commit to the indexed complete 64-element LDE row. FRI leaves commit to the indexed extension-field value. Internal nodes use domain-separated Poseidon2 hashing.
+
+### Transcript and FRI
+
+The Fiat-Shamir transcript binds the public input, trace root, committed quotient and FRI roots, terminal vector, and query challenges in a frozen order.
+
+Binary FRI folds the initial composition word until 16 extension-field values remain. The verifier checks all authenticated openings, every fold relation, and the terminal degree bound.
+
+### Proof Format
+
+A `QMG64P01` proof contains:
+
+- the format magic, revision, and trace-row exponent;
+- a canonical copy of the public input;
+- the indexed trace root and committed FRI roots;
+- the 16-element terminal vector;
+- 64 transcript-derived queries;
+- current and next trace openings with Merkle paths;
+- both authenticated FRI pair values for every committed layer.
+
+For fixed Scale, witness, constants, and contract revision, the proof bytes are deterministic.
+
+Scale `2^20`, seed 7, frozen regression vector:
 
 ```text
-trace generator
-constraint evaluator
-quotient evaluator
-local verifier checks
-air_id
-public input layout
+trace_root=
+0x497e153d6e9d6e2a;
+0x44105c9bf84e6af1;
+0x72fb0e27747412d1;
+0x59d0f6e5ccb64a56
+
+proof_bytes=539516
+proof_fnv=1a0614193dbbff79
 ```
 
-The backend owns:
+## Security Status
+
+The verifier is fail-closed. It binds the external public input, consumes the complete proof byte string, replays the transcript, verifies every Merkle path, checks the AIR and quotient identities, checks every FRI fold, and enforces the terminal degree bound.
+
+The C++, Rust, and RX 7900 XTX implementations are checked against the same frozen mathematical contract and canonical proof vectors. Qualification compares trace roots, proof sizes, proof hashes, complete proof bytes, repeated-run determinism, and independent verifier results.
+
+Malformed encodings, wrong public statements, proof mutations, truncated data, and trailing bytes are rejected by the reference verification tests.
+
+The project has not undergone an independent third-party cryptographic audit.
+
+## Engineering Status
+
+QINGMING-STARK-G64 is a complete single-machine, fixed-AIR canonical STARK engine within its declared contract.
+
+The qualified implementation includes:
+
+- independent C++ and Rust CPU references;
+- a direct RX 7900 XTX HIP proving path;
+- deterministic canonical proof serialization;
+- independent C++ and Rust verification;
+- Scale `2^20` through `2^27`;
+- direct device-resident trace/LDE, FRI vectors, Merkle trees, and query openings;
+- witness input and streamed canonical trace input;
+- per-stage end-to-end timing reports;
+- byte-for-byte cross-implementation qualification.
+
+The mathematical contract is normative. Source code, scripts, generated proofs, and reports conform only when they agree with that contract.
+
+## Requirements
+
+For all three implementations:
 
 ```text
-NTT
-trace commitment
-quotient commitment
-Merkle openings
-FRI commit-fold chain
-QSPG64 proof file
-standalone verifier
+Linux(Ubuntu 24.04 LTS)
 ```
 
-## Proof contract
-
-A `.qsp` file is a full QSPG64 STARK proof.
-
-It binds:
+For the C++ reference:
 
 ```text
-public inputs
-public input digest
-statement digest
-trace_root
-trace openings
-quotient_root
-QMPG64 quotient-FRI proof core
-local AIR verifier material
+g++ with C++20 support
 ```
 
-The standalone verifier checks:
+For the Rust reference:
 
 ```text
-public_input_binding
-statement_digest
-trace_openings
-quotient_fri_check
-local_air_checks
-quotient_relation_checks
+rustc
 ```
 
-A QMPG64 proof core alone is not a complete STARK proof. The complete proof boundary is QSPG64.
-
-## Retained Merkle tree proving
-
-`stark-prove` uses retained Merkle trees.
-
-During the first trace commitment and quotient FRI pass, the backend keeps Merkle trees in GPU memory. Opening extraction then reads paths from retained trees instead of rebuilding trees.
-
-Expected proof-builder line:
+For the RX 7900 XTX backend:
 
 ```text
-opening_source: retained_merkle_trees
+ROCm
+hipcc
+AMD RX 7900 XTX 24 GB
+default target: gfx1100
 ```
 
-This trades GPU memory for proof time.
+## C++ CPU Reference
 
-## Build
+Build:
 
 ```bash
-make -C rx7900xtx-24g
+mkdir -p build
+
+g++ -O3 -std=c++20 \
+  cpu-cpp/qingming_stark_g64.cpp \
+  -o build/qingming_stark_g64_cpp
 ```
 
-## Minimal correctness check
+Run the regression tests:
 
 ```bash
-./rx7900xtx-24g/build/qingming_stark_g64_backend \
-  rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
-  --mode stark-check \
-  --leaves 4096 \
-  --cols 16 \
-  --final-rows 1
+build/qingming_stark_g64_cpp test
+build/qingming_stark_g64_cpp scale-contract
 ```
 
-Expected:
-
-```text
-status: PASS
-local_air_checks: PASS
-quotient_relation_checks: PASS
-qmpg64v1_cpu_gpu_fri_check: PASS
-```
-
-## Full proof and standalone verification
-
-Generate proof:
+Generate a canonical proof:
 
 ```bash
-./rx7900xtx-24g/build/qingming_stark_g64_backend \
-  rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
-  --mode stark-prove \
-  --scale 27 \
-  --cols 16 \
-  --final-rows 1 \
-  --proof-out geoclock_scale27.qsp
+build/qingming_stark_g64_cpp \
+  proof-file 20 \
+  build/cpp-scale-20.qmg64p01
 ```
 
-Verify proof:
+Verify a canonical proof:
 
 ```bash
-./rx7900xtx-24g/build/qingming_stark_g64_verifier \
-  rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
-  geoclock_scale27.qsp
+build/qingming_stark_g64_cpp \
+  verify-file 20 \
+  build/cpp-scale-20.qmg64p01
 ```
 
-Expected verifier result:
+Run the Scale matrix:
+
+```bash
+build/qingming_stark_g64_cpp scale-matrix 20 27
+```
+
+Generate a canonical trace file:
+
+```bash
+build/qingming_stark_g64_cpp \
+  trace-file 20 \
+  build/trace-scale-20.qmt64t01
+```
+
+## Rust CPU Reference
+
+Build:
+
+```bash
+mkdir -p build
+
+rustc -O \
+  cpu-rust/qingming_stark_g64.rs \
+  -o build/qingming_stark_g64_rust
+```
+
+Run the regression tests:
+
+```bash
+build/qingming_stark_g64_rust test
+build/qingming_stark_g64_rust scale-contract
+```
+
+Generate a canonical proof:
+
+```bash
+build/qingming_stark_g64_rust \
+  proof-file 20 \
+  build/rust-scale-20.qmg64p01
+```
+
+Verify a canonical proof:
+
+```bash
+build/qingming_stark_g64_rust \
+  verify-file 20 \
+  build/rust-scale-20.qmg64p01
+```
+
+Run the Scale matrix:
+
+```bash
+build/qingming_stark_g64_rust scale-matrix 20 27
+```
+
+## RX 7900 XTX 24 GB GPU Prover
+
+Build:
+
+```bash
+mkdir -p build
+
+hipcc -O3 -std=c++20 --offload-arch=gfx1100 \
+  devices/rx7900xtx-24g/src/qingming_stark_g64_backend.hip \
+  -Idevices/rx7900xtx-24g/include \
+  -o build/qingming_stark_g64_backend
+```
+
+Generate a proof and timing report:
+
+```bash
+build/qingming_stark_g64_backend \
+  --scale 20 \
+  --repeat 3 \
+  --seed 7 \
+  --constants devices/rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
+  --proof-out build/gpu-scale-20.qmg64p01 \
+  --report-out build/gpu-scale-20-timing.csv
+```
+
+The GPU prover accepts either a canonical witness or a canonical trace input:
+
+```bash
+build/qingming_stark_g64_backend \
+  --scale 20 \
+  --repeat 1 \
+  --witness witness.qmw64i01 \
+  --constants devices/rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
+  --proof-out build/gpu-witness-scale-20.qmg64p01 \
+  --report-out build/gpu-witness-scale-20-timing.csv
+```
+
+```bash
+build/qingming_stark_g64_backend \
+  --scale 20 \
+  --repeat 1 \
+  --trace-in build/trace-scale-20.qmt64t01 \
+  --constants devices/rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
+  --proof-out build/gpu-trace-scale-20.qmg64p01 \
+  --report-out build/gpu-trace-scale-20-timing.csv
+```
+
+`--witness` and `--trace-in` are mutually exclusive.
+
+## Unified Build and Qualification
+
+Build all implementations:
+
+```bash
+chmod +x build_all.sh verify_final.sh verify_cpu_only.sh
+./build_all.sh
+```
+
+Override the GPU target when necessary:
+
+```bash
+GPU_ARCH=gfx1100 ./build_all.sh
+```
+
+Run the complete Scale `2^20` through `2^27` qualification, with three GPU repetitions per Scale:
+
+```bash
+./verify_final.sh 20 27 3
+```
+
+This qualification checks:
 
 ```text
-status: PASS
-proof_format: QSPG64
-public_input_binding: PASS
-statement_digest: PASS
-trace_openings: PASS
-quotient_fri_check: PASS
-local_air_checks: PASS
-quotient_relation_checks: PASS
+mathematical contract integrity
+C++ and Rust reference regressions
+C++ / Rust proof-byte identity
+CPU / GPU proof-byte identity
+GPU repeated-run identity
+C++ verification of GPU proofs
+Rust verification of GPU proofs
+canonical trace-input streaming parity
+per-stage timing output
 ```
 
-## Verified full scale matrix
+Run the CPU-only regression:
 
-The retained-tree benchmark matrix has been verified from SCALE20 through SCALE27.
+```bash
+./verify_cpu_only.sh
+```
+
+## Input Formats
+
+Canonical witness input:
 
 ```text
-SCALE | rows    | NTT                 | retained MiB | proof total ms | verify
-------|---------|---------------------|--------------|----------------|-------
-20    | 65536   | rowwise fallback    | 11.999       | 104.809        | PASS
-21    | 131072  | rowwise fallback    | 23.999       | 124.814        | PASS
-22    | 262144  | rowwise fallback    | 47.999       | 158.471        | PASS
-23    | 524288  | rowwise fallback    | 95.999       | 222.443        | PASS
-24    | 1048576 | rowwise fallback    | 191.999      | 342.280        | PASS
-25    | 2097152 | rowwise fallback    | 383.999      | 567.461        | PASS
-26    | 4194304 | rowwise fallback    | 767.999      | 1041.924       | PASS
-27    | 8388608 | fast_prelayout_xyz  | 1535.999     | 2041.975       | PASS
+8 bytes: ASCII QMW64I01
+16 x u64 little-endian canonical Goldilocks elements
+end of file
 ```
 
-SCALE27 is the primary FAST XYZ benchmark.
-
-Full details are in:
+Canonical trace input:
 
 ```text
-docs/BENCHMARK_RX7900XTX_24G.md
-docs/BENCHMARK_SCALE_MATRIX_RX7900XTX_24G.csv
+8 bytes: ASCII QMT64T01
+u32 revision = 1
+u32 scale_log2
+u64 trace_rows
+u32 columns = 64
+u32 reserved = 0
+trace_rows x 64 x u64 little-endian canonical field elements
+end of file
 ```
 
-## Benchmark chart placeholder
+## License
 
-The full SCALE20-SCALE27 data is now available, but this package does not include a generated chart image yet.
-
-Recommended chart for README:
-
-```text
-title: QSPG64 retained-tree proving time by scale
-x-axis: scale_log2
-y-axis: proof_total_ms
-```
-
-Recommended second chart:
-
-```text
-title: Retained Merkle tree memory by scale
-x-axis: scale_log2
-y-axis: retained_merkle_tree_mib
-```
-
-Generate and add the chart in a later documentation pass.
-
-## Final baseline statement
-
-`qingming-stark-g64` provides a reproducible CLI-based QSPG64 STARK proving and verification backend verified on AMD RX 7900 XTX 24GB.
-
-The official contract is:
-
-```text
-source-visible backend
-explicit CLI prover
-inspectable QSPG64 proof file
-standalone verifier
-retained Merkle tree proof builder
-compiled AIR profile integration path
-```
+Licensed under the Apache License, Version 2.0. See `LICENSE`.

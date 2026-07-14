@@ -1,0 +1,13 @@
+status=PASS
+air_id=QMG-AIR-POSEIDON2-CHAIN
+air_revision=1
+backend=rust
+trace_rows=31
+trace_width=12
+maximum_constraint_degree=7
+constraint_residuals=372
+trace_fingerprint=88cb773e3f3c78d9
+public_output_0=12503130814229952347
+public_output_1=9430352786367723139
+public_output_2=9240873561283387356
+public_output_3=14490414504176896119
