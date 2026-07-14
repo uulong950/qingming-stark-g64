@@ -377,47 +377,6 @@ build/qingming_stark_g64_backend \
 
 `--witness` and `--trace-in` are mutually exclusive.
 
-## Unified Build and Qualification
-
-Build all implementations:
-
-```bash
-chmod +x build_all.sh verify_final.sh verify_cpu_only.sh
-./build_all.sh
-```
-
-Override the GPU target when necessary:
-
-```bash
-GPU_ARCH=gfx1100 ./build_all.sh
-```
-
-Run the complete Scale `2^20` through `2^27` qualification, with three GPU repetitions per Scale:
-
-```bash
-./verify_final.sh 20 27 3
-```
-
-This qualification checks:
-
-```text
-mathematical contract integrity
-C++ and Rust reference regressions
-C++ / Rust proof-byte identity
-CPU / GPU proof-byte identity
-GPU repeated-run identity
-C++ verification of GPU proofs
-Rust verification of GPU proofs
-canonical trace-input streaming parity
-per-stage timing output
-```
-
-Run the CPU-only regression:
-
-```bash
-./verify_cpu_only.sh
-```
-
 ## Input Formats
 
 Canonical witness input:
