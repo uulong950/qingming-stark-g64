@@ -336,8 +336,8 @@ Build:
 mkdir -p build
 
 hipcc -O3 -std=c++20 --offload-arch=gfx1100 \
-  rx7900xtx-24g/src/qingming_stark_g64_backend.hip \
-  -Idevices/rx7900xtx-24g/include \
+  rx7900xtx-24g/qingming_stark_g64_backend.hip \
+  -Idevices/rx7900xtx-24g \
   -o build/qingming_stark_g64_backend
 ```
 
@@ -348,7 +348,7 @@ build/qingming_stark_g64_backend \
   --scale 20 \
   --repeat 3 \
   --seed 7 \
-  --constants rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
+  --constants rx7900xtx-24g/qingming_poseidon2_g64_constants.h \
   --proof-out build/gpu-scale-20.qmg64p01 \
   --report-out build/gpu-scale-20-timing.csv
 ```
@@ -360,7 +360,7 @@ build/qingming_stark_g64_backend \
   --scale 20 \
   --repeat 1 \
   --witness witness.qmw64i01 \
-  --constants rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
+  --constants rx7900xtx-24g/qingming_poseidon2_g64_constants.h \
   --proof-out build/gpu-witness-scale-20.qmg64p01 \
   --report-out build/gpu-witness-scale-20-timing.csv
 ```
@@ -370,7 +370,7 @@ build/qingming_stark_g64_backend \
   --scale 20 \
   --repeat 1 \
   --trace-in build/trace-scale-20.qmt64t01 \
-  --constants rx7900xtx-24g/include/qingming_poseidon2_g64_constants.h \
+  --constants rx7900xtx-24g/qingming_poseidon2_g64_constants.h \
   --proof-out build/gpu-trace-scale-20.qmg64p01 \
   --report-out build/gpu-trace-scale-20-timing.csv
 ```
