@@ -5,7 +5,7 @@ QINGMING-STARK-G64 is a canonical STARK implementation over the Goldilocks 64-bi
 The canonical contract is:
 
 ```text
-QINGMING_STARK_G64_MATHEMATICAL_CONTRACT.md
+QINGMING_STARK_G64_CONTRACT.md
 ```
 
 Contract revision: `QMG64-FINAL-3`  
