@@ -1,3 +1,7 @@
+The published qualification and performance results can be reproduced with
+[`benchmarks/run.sh`](benchmarks/run.sh). See
+[Unified Qualification and Benchmarking](#unified-qualification-and-benchmarking).
+
 # QINGMING-STARK-G64
 
 QINGMING-STARK-G64 is a canonical STARK implementation over the Goldilocks 64-bit field. The repository contains independent C++ and Rust CPU references, a full RX 7900 XTX GPU prover, canonical proof serialization, and fail-closed verification under one frozen mathematical contract.
@@ -235,6 +239,120 @@ hipcc
 AMD RX 7900 XTX 24 GB
 default target: gfx1100
 ```
+## Unified Qualification and Benchmarking
+
+The canonical qualification and benchmarking entry point is:
+
+```text
+benchmarks/run.sh
+```
+
+Run all commands from the repository root.
+
+The script builds the canonical C++, Rust, and RX 7900 XTX implementations and writes generated binaries, proofs, logs, and reports under:
+
+```text
+build/
+```
+
+### Correctness Qualification
+
+Run the complete supported Scale sweep:
+
+```bash
+chmod +x benchmarks/run.sh
+
+./benchmarks/run.sh correctness 20 27 3
+```
+
+The arguments are:
+
+```text
+correctness <minimum Scale exponent> <maximum Scale exponent> <GPU repeat count>
+```
+
+The canonical full qualification command therefore covers Scale `2^20` through `2^27`, with three GPU proving runs per Scale.
+
+The correctness qualification includes:
+
+* Fibonacci C++ / Rust / HIP consistency;
+* Poseidon2-chain C++ / Rust / HIP consistency;
+* C++ correctness regression;
+* Rust correctness regression;
+* C++ Scale-contract regression;
+* Rust Scale-contract regression;
+* canonical trace-root comparison;
+* canonical proof-length comparison;
+* canonical proof FNV-1a-64 comparison;
+* complete proof-byte comparison within the configured CPU proving range;
+* repeated GPU proof determinism;
+* C++ verifier acceptance of GPU proofs;
+* Rust verifier acceptance of GPU proofs;
+* malformed-proof rejection.
+
+Within the configured CPU proving range, the C++, Rust, and GPU implementations MUST produce byte-for-byte identical canonical proofs.
+
+For higher GPU-only proving Scales, the generated GPU proof MUST be accepted independently by both the C++ and Rust canonical verifiers.
+
+A successful full correctness qualification terminates with:
+
+```text
+air_examples=PASS
+correctness=PASS
+```
+
+The canonical correctness report is written to:
+
+```text
+build/reports/correctness-gpu-20-27.csv
+```
+
+### Performance Benchmark
+
+Run the canonical RX 7900 XTX performance sweep:
+
+```bash
+WARMUP=1 ./benchmarks/run.sh performance 20 27 5
+```
+
+The arguments are:
+
+```text
+performance <minimum Scale exponent> <maximum Scale exponent> <measured repeat count>
+```
+
+This command performs one warm-up run and five measured runs for every Scale from `2^20` through `2^27`.
+
+The performance report includes stage-level timing for the direct GPU proving path, canonical CPU verification, and total end-to-end execution.
+
+A successful performance run terminates with:
+
+```text
+performance=PASS
+```
+
+The canonical performance report is written to:
+
+```text
+build/reports/performance-gpu-20-27.csv
+```
+
+### Running Both Qualification Modes
+
+To run correctness qualification followed by the performance benchmark:
+
+```bash
+./benchmarks/run.sh correctness 20 27 3
+WARMUP=1 ./benchmarks/run.sh performance 20 27 5
+```
+
+The correctness run MUST pass before performance results are treated as qualified benchmark results.
+
+### Manual Implementation Commands
+
+The C++, Rust, and RX 7900 XTX commands in the following sections are lower-level interfaces for individual development, debugging, proof generation, and verification.
+
+For canonical full-repository qualification, use `benchmarks/run.sh`.
 
 ## C++ CPU Reference
 
