@@ -7,8 +7,6 @@ The canonical contract is:
 ```text
 QINGMING_STARK_G64_CONTRACT.md
 ```
-
-Contract revision: `QMG64-FINAL-3`  
 Proof format: `QMG64P01`  
 Supported Scale range: `2^20` through `2^27`
 
